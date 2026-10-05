@@ -87,7 +87,7 @@ const SPLIT={Accommodation:.4,Transport:.2,Food:.2,Activities:.15,Misc:.05};
 let cur=null,filter='All';
 
 /* ---- Data store ---- */
-const users=()=>L.get('users',[]),me=()=>users().find(u=>u.email===L.get('me')),trips=()=>L.get('trips',[]);
+const users=()=>L.get('users',[]),me=()=>users().find(u=>u.email===L.get('me')),trips=()=>L.get('trips',[]).map(t=>Array.isArray(t.days)?{...t,plan:t.days,days:t.days.length}:t);
 async function seed(){if(users().length)return;const p=await hash('demo123');L.set('users',[{name:'Ishika',email:'ishika@mail.com',pw:p,role:'Admin'},{name:'Negi',email:'negi@mail.com',pw:p,role:'User'},{name:'Mansi',email:'mansi@mail.com',pw:p,role:'User'}])}
 
 /* ---- AI itinerary engine (rule-based recommender) ---- */
@@ -100,7 +100,7 @@ function generate(f){
   if(i===f.days&&j===2&&f.days>1)return{s,t:'Souvenir shopping and departure',l:d.n};
   const a=pool[k++%pool.length];return{s,t:a[0],l:a[1]}}));
  const est=d.base*STY[f.style]*f.days*f.travelers;
- return{...f,days,est,id:Date.now()}}
+ return{...f,plan:days,est,id:Date.now()}}
 
 /* ---- Views ---- */
 function navbar(){const u=me(),h=location.hash.slice(1).split('/')[0]||'home';
@@ -137,7 +137,7 @@ function result(){if(!cur){location.hash='plan';return}
  app.innerHTML=`<main><div class="card" style="background:var(--soft)"><div class="tags"><span>${d.n}</span><span>${cur.days} day${cur.days>1?'s':''}</span><span>${cur.travelers} traveler${cur.travelers>1?'s':''}</span><span>${esc(cur.style)}</span></div>
 <h2>Your itinerary</h2><p class="sub" style="margin-bottom:0">Estimated cost <b>${money(cur.est)}</b> for your budget of <b>${money(cur.budget)}</b>. ${over>0?`<span class="bad">Over by ${money(over)}. Try Budget style or fewer days.</span>`:`<span class="ok">Within budget, ${money(-over)} to spare.</span>`}</p></div>
 <div class="row noprint"><button class="btn" id="save">Save this trip</button><button class="btn ghost" onclick="print()">Print</button><a class="btn ghost" href="#plan/${cur.dest}">Change inputs</a></div>
-<section id="days">${cur.days.map((a,i)=>`<div class="day"><h3>Day ${i+1}</h3>${a.map((x,j)=>`<div class="act"><b>${x.s}</b><span>${esc(x.t)}</span><i>${esc(x.l)}</i><button class="x noprint" data-d="${i}" data-j="${j}" aria-label="Remove activity">✕</button></div>`).join('')}<form class="add noprint" data-d="${i}"><input placeholder="Add an activity" maxlength="80" aria-label="Add activity to day ${i+1}"><button class="btn ghost sm">Add</button></form></div>`).join('')}</section>
+<section id="days">${cur.plan.map((a,i)=>`<div class="day"><h3>Day ${i+1}</h3>${a.map((x,j)=>`<div class="act"><b>${x.s}</b><span>${esc(x.t)}</span><i>${esc(x.l)}</i><button class="x noprint" data-d="${i}" data-j="${j}" aria-label="Remove activity">✕</button></div>`).join('')}<form class="add noprint" data-d="${i}"><input placeholder="Add an activity" maxlength="80" aria-label="Add activity to day ${i+1}"><button class="btn ghost sm">Add</button></form></div>`).join('')}</section>
 <section class="two"><div class="card"><h3>Budget breakdown</h3>${Object.entries(SPLIT).map(([k,v])=>`<div style="margin-top:12px;display:flex;justify-content:space-between"><span>${k}</span><b>${money(cur.est*v)}</b></div><div class="bar"><div style="width:${v*100}%"></div></div>`).join('')}</div>
 <div class="card"><h3>Weather</h3><p class="sub">Typical conditions in ${d.n}: <b>${d.w[0]}</b>, ${d.w[1]}. Sample data, so check a live forecast before you go.</p><h3>Dining ideas</h3><ul class="l">${d.f.map(x=>`<li>${x}</li>`).join('')}</ul></div></section>
 <section class="two"><div class="card"><h3>Hotels</h3><table>${hs.map(h=>`<tr><td>${h.n}<br><small class="${h.fit?'ok':''}">${h.fit?'Fits your budget':'Above your budget share'}</small></td><td>★ ${h.r}</td><td>${money(h.p)}/night</td></tr>`).join('')}</table></div>
@@ -145,8 +145,8 @@ function result(){if(!cur){location.hash='plan';return}
 <p class="sub">Prices, ratings and weather are illustrative sample data. Confirm details before booking.</p></main>`;
  $('#save').onclick=()=>{if(!me()){toast('Log in to save your trip.');location.hash='login';return}
   const all=trips();all.push({...cur,owner:me().email,saved:new Date().toISOString().slice(0,10)});L.set('trips',all);toast('Trip saved.')};
- document.querySelectorAll('.x').forEach(b=>b.onclick=()=>{cur.days[b.dataset.d].splice(b.dataset.j,1);result()});
- document.querySelectorAll('.add').forEach(f=>f.onsubmit=e=>{e.preventDefault();const v=f.querySelector('input').value.trim();if(!v)return toast('Type an activity first.');cur.days[f.dataset.d].push({s:'Added',t:v,l:D[cur.dest].n});result()})}
+ document.querySelectorAll('.x').forEach(b=>b.onclick=()=>{cur.plan[b.dataset.d].splice(b.dataset.j,1);result()});
+ document.querySelectorAll('.add').forEach(f=>f.onsubmit=e=>{e.preventDefault();const v=f.querySelector('input').value.trim();if(!v)return toast('Type an activity first.');cur.plan[f.dataset.d].push({s:'Added',t:v,l:D[cur.dest].n});result()})}
 
 function explore(){const tags=['All','beach','heritage','nature','adventure','food'];
  const ks=Object.keys(D).filter(k=>filter==='All'||D[k].a.some(a=>a[2].includes(filter)));
