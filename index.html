@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Travel Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f8f8;--card:#fff;--ink:#0f2230;--mute:#587080;--line:#dbe6e9;--mint:#6ee7c8;--btn:#1f6feb;--soft:#e8f4f3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1820;--card:#12262f;--ink:#e6f1f3;--mute:#93aab4;--line:#21404b;--soft:#143039}}
+:root[data-theme="dark"]{--bg:#0b1820;--card:#12262f;--ink:#e6f1f3;--mute:#93aab4;--line:#21404b;--soft:#143039}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Figtree,system-ui,sans-serif}
+h1,h2,h3{font-family:'Bricolage Grotesque',Figtree,system-ui,sans-serif;line-height:1.1;margin:0}
+.hero,nav{background:linear-gradient(135deg,#0e2438 0%,#12495a 60%,#1b7b80 100%);color:#fff}
+nav{display:flex;align-items:center;gap:6px 18px;flex-wrap:wrap;padding:14px 5vw;border-bottom:1px solid #ffffff22}
+nav b{font:800 20px 'Bricolage Grotesque',sans-serif;margin-right:auto}nav b span{color:var(--mint)}
+nav a{color:#fff;text-decoration:none;font-size:14px;opacity:.85;padding:4px 0}nav a:hover,nav a.on{opacity:1;color:var(--mint)}
+.hero{padding:9vh 5vw 11vh}.hero h1{font-size:clamp(38px,7vw,68px);max-width:12ch}.hero h1 em{font-style:normal;color:var(--mint)}
+.hero p{max-width:40ch;opacity:.85;margin:18px 0 26px}
+main{max-width:1050px;margin:0 auto;padding:34px 5vw 60px}
+section+section{margin-top:44px}
+.sub{color:var(--mute);margin:6px 0 20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.dest{border-radius:16px;min-height:230px;padding:18px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;position:relative}
+.dest small{color:var(--mint);font-weight:600}.dest h3{font-size:28px}.dest p{margin:4px 0 12px;font-size:14px;opacity:.9}
+.dest .fav{position:absolute;top:12px;right:12px;background:#0006;color:#fff;border:0;border-radius:99px;width:36px;height:36px;font-size:18px;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.btn{display:inline-block;background:var(--btn);color:#fff;border:0;border-radius:9px;padding:10px 18px;font:600 15px Figtree,sans-serif;cursor:pointer;text-decoration:none}
+.btn.mint{background:var(--mint);color:#06323a}.btn.ghost{background:var(--soft);color:var(--ink)}.btn.sm{padding:6px 12px;font-size:13px}.btn.w{background:#fff;color:#0f2230}
+label{display:block;font-weight:600;font-size:14px;margin:14px 0 5px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink);font:inherit}
+:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+form.card{max-width:520px}.row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.err{color:#d6405a;font-size:13px;margin-top:6px;min-height:18px}
+.tags span,.chip{display:inline-block;background:var(--soft);border-radius:99px;padding:3px 12px;font-size:13px;font-weight:600;margin:0 6px 6px 0;border:0;color:var(--ink)}
+.chip{cursor:pointer}.chip.on{background:var(--mint);color:#06323a}
+.day{border-left:4px solid #1b7b80;padding:2px 0 2px 16px;margin:18px 0}
+.day h3{font-size:19px;margin-bottom:6px}.act{display:flex;gap:8px;align-items:baseline;padding:6px 10px;background:var(--soft);border-radius:8px;margin:5px 0}
+.act b{min-width:84px;font-size:14px}.act span{flex:1}.act i{color:var(--mute);font-size:13px;font-style:normal}
+.x{background:none;border:0;color:var(--mute);cursor:pointer;font-size:16px}
+.add{display:flex;gap:6px;margin-top:6px}.add input{padding:6px 10px}
+.bar{height:10px;border-radius:9px;background:var(--soft);overflow:hidden;margin:4px 0 12px}.bar div{height:100%;background:linear-gradient(90deg,#1b7b80,var(--mint))}
+.two{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+table{width:100%;border-collapse:collapse}td,th{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+.ok{color:#12a38f;font-weight:600}.bad{color:#d6405a;font-weight:600}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#0f2230;color:#fff;padding:10px 18px;border-radius:9px;display:none;z-index:9;max-width:90vw}
+ul.l{padding-left:20px;margin:6px 0}.stat{display:flex;gap:12px;flex-wrap:wrap}.stat div{background:var(--soft);padding:12px 18px;border-radius:10px}.stat b{font-size:22px;display:block}
+@media print{nav,.noprint{display:none!important}}
+</style></head><body>
+<nav id="nav"></nav>
+<div id="app"></div>
+<div id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s),app=$('#app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mem={};
+const L={get(k,d){try{const v=localStorage.getItem(k);if(v)return JSON.parse(v)}catch(e){}return k in mem?mem[k]:d},set(k,v){mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const hash=async p=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+const money=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t.k);t.k=setTimeout(()=>t.style.display='none',2800)}
+
+/* ---- Sample destination data (illustrative; verify prices locally) ---- */
+const D={
+goa:{n:'Goa',c:'India',tag:'Beach escape',d:'Sun, sand & slow days',g:'#2f8f8a,#a8a77a',base:3500,w:['28–33°C','Sunny and humid'],
+ a:[['Baga & Calangute Beach','North Goa','beach nightlife'],['Fort Aguada','Candolim','heritage nature'],['Basilica of Bom Jesus','Old Goa','heritage'],['Dudhsagar Falls','Mollem','nature adventure'],['Fontainhas Latin Quarter','Panaji','art heritage food'],['Anjuna Flea Market','Anjuna','shopping'],['Palolem Beach','South Goa','beach nature'],['Water sports','Calangute','adventure beach']],
+ h:[['Beach Hostel Stay',1800,4.0],['Candolim Comfort Inn',4500,4.2],['Taj-style Beach Resort',11000,4.7]],
+ t:[['Rented scooter',500,'₹400–600/day'],['App-based cab',1200,'₹1,000–1,500/day'],['Bus / shuttle',300,'₹200–400/day'],['Train to Madgaon',1100,'₹900–1,500 one way']],
+ f:['Try fish thali at a local shack','Sunset dinner on Vagator cliffs','Bakery breakfast in Panaji']},
+jaipur:{n:'Jaipur',c:'India',tag:'Royal heritage',d:'Colorful streets & palaces',g:'#b0603e,#e0a070',base:3000,w:['22–35°C','Dry and sunny'],
+ a:[['Amber Fort','Amer','heritage'],['City Palace','Old City','heritage art'],['Hawa Mahal','Old City','heritage art'],['Jantar Mantar','Old City','heritage'],['Nahargarh Fort sunset','Aravalli hills','nature heritage'],['Bapu & Johari Bazaar','Old City','shopping food'],['Jal Mahal','Man Sagar Lake','nature art'],['Hot-air balloon ride','Amer','adventure']],
+ h:[['Pink City Hostel',1500,3.9],['Haveli Heritage Stay',4800,4.4],['Palace Hotel',13000,4.8]],
+ t:[['Auto-rickshaw',400,'₹300–500/day'],['App-based cab',1300,'₹1,000–1,600/day'],['Rental car with driver',2500,'₹2,200–3,000/day'],['Train to Jaipur Jn',900,'₹600–1,400 one way']],
+ f:['Try a traditional Rajasthani thali','Look for local kachori and sweets shops','Explore restaurants around Bapu Bazaar']},
+paris:{n:'Paris',c:'France',tag:'City of romance',d:'Art, cafés & charming walks',g:'#4a6b8f,#c0a0a0',base:15000,w:['8–20°C','Mild, light showers'],
+ a:[['Eiffel Tower','7th arr.','heritage'],['Louvre Museum','1st arr.','art heritage'],['Montmartre & Sacré-Cœur','18th arr.','art'],['Seine river cruise','Central Paris','nature'],['Le Marais cafés','4th arr.','food shopping'],['Palace of Versailles','Versailles','heritage'],['Luxembourg Gardens','6th arr.','nature'],['Cabaret evening','Pigalle','nightlife']],
+ h:[['Budget Hostel Paris',5500,3.9],['Latin Quarter Hotel',14000,4.3],['Luxury Seine Hotel',38000,4.8]],
+ t:[['Metro day pass',900,'₹800–1,000/day'],['Taxi / ride-hailing',3000,'₹2,500–4,000/day'],['Bike share',700,'₹600–800/day'],['Train from airport (RER B)',1000,'₹900–1,100 one way']],
+ f:['Pick up a fresh baguette at a boulangerie','Try a bistro prix-fixe lunch','Crêpes near Montmartre']},
+manali:{n:'Manali',c:'India',tag:'Mountain break',d:'Snow peaks & river trails',g:'#3f6e5a,#9ab8c8',base:3200,w:['2–18°C','Cool, clear skies'],
+ a:[['Solang Valley','Solang','adventure nature'],['Hadimba Temple','Manali','heritage nature'],['Old Manali cafés','Old Manali','food art'],['Rohtang Pass','Rohtang','adventure nature'],['Vashisht Hot Springs','Vashisht','nature heritage'],['Mall Road','Manali','shopping food'],['River rafting','Kullu','adventure'],['Jogini Falls trek','Vashisht','nature adventure']],
+ h:[['Backpacker Hostel',1200,4.0],['Riverside Cottage',3800,4.3],['Himalayan Resort',9500,4.6]],
+ t:[['Local taxi',2000,'₹1,500–2,500/day'],['Volvo bus from Delhi',1500,'₹1,200–1,800 one way'],['Rented bike',800,'₹700–1,000/day'],['Shared cab',400,'₹300–500/day']],
+ f:['Try Himachali siddu with ghee','Trout fish at a riverside café','Warm momos on Mall Road']}
+};
+const STY={Budget:.7,Balanced:1,Luxury:1.8};
+const SPLIT={Accommodation:.4,Transport:.2,Food:.2,Activities:.15,Misc:.05};
+let cur=null,filter='All';
+
+/* ---- Data store ---- */
+const users=()=>L.get('users',[]),me=()=>users().find(u=>u.email===L.get('me')),trips=()=>L.get('trips',[]);
+async function seed(){if(users().length)return;const p=await hash('demo123');L.set('users',[{name:'Ishika',email:'ishika@mail.com',pw:p,role:'Admin'},{name:'Negi',email:'negi@mail.com',pw:p,role:'User'},{name:'Mansi',email:'mansi@mail.com',pw:p,role:'User'}])}
+
+/* ---- AI itinerary engine (rule-based recommender) ---- */
+function generate(f){
+ const d=D[f.dest],ws=f.interests.toLowerCase().split(/[^a-z]+/).filter(w=>w.length>2);
+ const score=a=>a[2].split(' ').filter(t=>ws.some(w=>t.startsWith(w.slice(0,4))||w.startsWith(t.slice(0,4)))).length;
+ const pool=d.a.map((a,i)=>({a,s:score(a)-i*.01})).sort((x,y)=>y.s-x.s).map(x=>x.a);
+ let k=0;const days=[];
+ for(let i=1;i<=f.days;i++)days.push(['Morning','Afternoon','Evening'].map((s,j)=>{
+  if(i===f.days&&j===2&&f.days>1)return{s,t:'Souvenir shopping and departure',l:d.n};
+  const a=pool[k++%pool.length];return{s,t:a[0],l:a[1]}}));
+ const est=d.base*STY[f.style]*f.days*f.travelers;
+ return{...f,days,est,id:Date.now()}}
+
+/* ---- Views ---- */
+function navbar(){const u=me(),h=location.hash.slice(1).split('/')[0]||'home';
+ const l=(r,t)=>`<a href="#${r}" class="${h===r?'on':''}">${t}</a>`;
+ $('#nav').innerHTML=`<b>✈ AI<span>TravelPlanner</span></b>${l('plan','Plan a trip')}${l('explore','Explore')}${l('trips','My trips')}${l('feedback','Feedback')}${u?.role==='Admin'?l('admin','Admin'):''}${u?`<a href="#" id="out">Log out (${esc(u.name)})</a>`:l('login','Log in')}`;
+ const o=$('#out');if(o)o.onclick=e=>{e.preventDefault();L.set('me','');toast('Logged out.');location.hash='home'}}
+
+function destCard(k){const d=D[k],fav=(L.get('fav:'+L.get('me'),[])).includes(k);
+ return`<div class="dest" style="background:linear-gradient(to top,#0b1820e0 25%,#0000),linear-gradient(135deg,${d.g})"><button class="fav" data-f="${k}" aria-label="Favorite ${d.n}">${fav?'♥':'♡'}</button><small>${d.tag}</small><h3>${d.n}</h3><p>${d.d}</p><a class="btn w sm" href="#plan/${k}" style="align-self:flex-start">Plan this trip</a></div>`}
+
+function home(){app.innerHTML=`<header class="hero"><h1>Where do you want to <em>go next?</em></h1><p>Tell us your budget and interests. We build a day-by-day plan with hotels, transport and costs.</p><a class="btn mint" href="#plan">Start planning</a></header>
+<main><section><h2>Popular destinations</h2><p class="sub">A little wanderlust goes a long way.</p><div class="grid">${Object.keys(D).map(destCard).join('')}</div></section>
+<section><h2>How it works</h2><div class="two" style="margin-top:16px"><div class="card"><h3>1. Enter your trip</h3><p class="sub">Destination, days, travelers, budget, style and interests.</p></div><div class="card"><h3>2. Get your plan</h3><p class="sub">A day-wise itinerary, budget split, hotels, transport, weather and food ideas.</p></div><div class="card"><h3>3. Edit and save</h3><p class="sub">Swap activities, then save the trip to your account.</p></div></div></section></main>`;favs()}
+
+function favs(){document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{
+ if(!me())return toast('Log in to save favorite destinations.');
+ const k='fav:'+L.get('me'),a=L.get(k,[]),i=a.indexOf(b.dataset.f);i<0?a.push(b.dataset.f):a.splice(i,1);L.set(k,a);b.textContent=i<0?'♥':'♡'})}
+
+function plan(p){const sel=D[p]?p:'goa';
+ app.innerHTML=`<main><h2>Plan your trip</h2><p class="sub">Fill in the details and generate your itinerary.</p><form class="card" id="pf" novalidate>
+<label for="dest">Destination</label><select id="dest">${Object.keys(D).map(k=>`<option value="${k}" ${k===sel?'selected':''}>${D[k].n}, ${D[k].c}</option>`).join('')}</select>
+<label for="days">Trip duration (days)</label><input id="days" type="number" value="3" min="1" max="14">
+<label for="trav">Travelers</label><input id="trav" type="number" value="2" min="1" max="10">
+<label for="bud">Total budget (₹)</label><input id="bud" type="number" value="30000" min="1000">
+<label for="sty">Travel style</label><select id="sty">${Object.keys(STY).map(s=>`<option ${s==='Balanced'?'selected':''}>${s}</option>`).join('')}</select>
+<label for="int">Interests (optional)</label><textarea id="int" rows="3" placeholder="Beaches, museums, cafés, adventure…"></textarea>
+<div class="err" id="er"></div><div class="row"><button class="btn">Generate itinerary</button><button type="reset" class="btn ghost">Reset</button></div></form></main>`;
+ $('#pf').onsubmit=e=>{e.preventDefault();const f={dest:$('#dest').value,days:+$('#days').value,travelers:+$('#trav').value,budget:+$('#bud').value,style:$('#sty').value,interests:$('#int').value.slice(0,200)};
+  const er=!f.dest?'Choose a destination.':!(f.days>=1&&f.days<=14)?'Trip duration must be 1 to 14 days.':!(f.travelers>=1&&f.travelers<=10)?'Travelers must be 1 to 10.':!(f.budget>0)?'Enter a budget above ₹0.':'';
+  if(er){$('#er').textContent=er;return}cur=generate(f);location.hash='result'}}
+
+function result(){if(!cur){location.hash='plan';return}
+ const d=D[cur.dest],over=cur.est-cur.budget,hs=d.h.map(h=>({n:h[0],p:h[1],r:h[2],fit:h[1]*cur.days*Math.ceil(cur.travelers/2)<=cur.budget*SPLIT.Accommodation}));
+ app.innerHTML=`<main><div class="card" style="background:var(--soft)"><div class="tags"><span>${d.n}</span><span>${cur.days} day${cur.days>1?'s':''}</span><span>${cur.travelers} traveler${cur.travelers>1?'s':''}</span><span>${esc(cur.style)}</span></div>
+<h2>Your itinerary</h2><p class="sub" style="margin-bottom:0">Estimated cost <b>${money(cur.est)}</b> for your budget of <b>${money(cur.budget)}</b>. ${over>0?`<span class="bad">Over by ${money(over)}. Try Budget style or fewer days.</span>`:`<span class="ok">Within budget, ${money(-over)} to spare.</span>`}</p></div>
+<div class="row noprint"><button class="btn" id="save">Save this trip</button><button class="btn ghost" onclick="print()">Print</button><a class="btn ghost" href="#plan/${cur.dest}">Change inputs</a></div>
+<section id="days">${cur.days.map((a,i)=>`<div class="day"><h3>Day ${i+1}</h3>${a.map((x,j)=>`<div class="act"><b>${x.s}</b><span>${esc(x.t)}</span><i>${esc(x.l)}</i><button class="x noprint" data-d="${i}" data-j="${j}" aria-label="Remove activity">✕</button></div>`).join('')}<form class="add noprint" data-d="${i}"><input placeholder="Add an activity" maxlength="80" aria-label="Add activity to day ${i+1}"><button class="btn ghost sm">Add</button></form></div>`).join('')}</section>
+<section class="two"><div class="card"><h3>Budget breakdown</h3>${Object.entries(SPLIT).map(([k,v])=>`<div style="margin-top:12px;display:flex;justify-content:space-between"><span>${k}</span><b>${money(cur.est*v)}</b></div><div class="bar"><div style="width:${v*100}%"></div></div>`).join('')}</div>
+<div class="card"><h3>Weather</h3><p class="sub">Typical conditions in ${d.n}: <b>${d.w[0]}</b>, ${d.w[1]}. Sample data, so check a live forecast before you go.</p><h3>Dining ideas</h3><ul class="l">${d.f.map(x=>`<li>${x}</li>`).join('')}</ul></div></section>
+<section class="two"><div class="card"><h3>Hotels</h3><table>${hs.map(h=>`<tr><td>${h.n}<br><small class="${h.fit?'ok':''}">${h.fit?'Fits your budget':'Above your budget share'}</small></td><td>★ ${h.r}</td><td>${money(h.p)}/night</td></tr>`).join('')}</table></div>
+<div class="card"><h3>Getting around</h3><table>${d.t.map(t=>`<tr><td>${t[0]}</td><td>${t[2]}</td></tr>`).join('')}</table></div></section>
+<p class="sub">Prices, ratings and weather are illustrative sample data. Confirm details before booking.</p></main>`;
+ $('#save').onclick=()=>{if(!me()){toast('Log in to save your trip.');location.hash='login';return}
+  const all=trips();all.push({...cur,owner:me().email,saved:new Date().toISOString().slice(0,10)});L.set('trips',all);toast('Trip saved.')};
+ document.querySelectorAll('.x').forEach(b=>b.onclick=()=>{cur.days[b.dataset.d].splice(b.dataset.j,1);result()});
+ document.querySelectorAll('.add').forEach(f=>f.onsubmit=e=>{e.preventDefault();const v=f.querySelector('input').value.trim();if(!v)return toast('Type an activity first.');cur.days[f.dataset.d].push({s:'Added',t:v,l:D[cur.dest].n});result()})}
+
+function explore(){const tags=['All','beach','heritage','nature','adventure','food'];
+ const ks=Object.keys(D).filter(k=>filter==='All'||D[k].a.some(a=>a[2].includes(filter)));
+ app.innerHTML=`<main><h2>Explore destinations</h2><p class="sub">Filter by what you enjoy.</p><div>${tags.map(t=>`<button class="chip ${t===filter?'on':''}" data-t="${t}">${t==='All'?'All':t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div><div class="grid" style="margin-top:12px">${ks.map(destCard).join('')}</div>
+<section><h2>Travel and restaurant options</h2><p class="sub">Choose a destination to see ways to get around and dining ideas. Verify current details locally.</p><label for="ts">Destination</label><select id="ts">${Object.keys(D).map(k=>`<option value="${k}">${D[k].n}</option>`).join('')}</select><div id="tv"></div></section></main>`;
+ document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{filter=c.dataset.t;explore()});favs();
+ const show=()=>{const d=D[$('#ts').value];$('#tv').innerHTML=`<h3 style="margin-top:18px">Getting around ${d.n}</h3><ul class="l">${d.t.map(t=>`<li>${t[0]} (${t[2]})</li>`).join('')}</ul><h3>Dining ideas</h3><ul class="l">${d.f.map(x=>`<li>${x}</li>`).join('')}</ul>`};$('#ts').onchange=show;show()}
+
+function myTrips(){const u=me();if(!u){app.innerHTML=`<main><h2>My trips</h2><p class="sub">Log in to see your saved trips.</p><a class="btn" href="#login">Log in</a></main>`;return}
+ const t=trips().filter(x=>x.owner===u.email),fv=L.get('fav:'+u.email,[]);
+ app.innerHTML=`<main><h2>Saved trips</h2>${t.length?t.map(x=>`<div class="card" style="margin:12px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1"><b>${D[x.dest].n}</b> · ${x.days} days · ${money(x.budget)}<br><small class="sub">Saved ${x.saved}</small></div><button class="btn ghost sm" data-o="${x.id}">Open</button><button class="btn ghost sm" data-c="${x.id}">Duplicate</button><button class="btn ghost sm" data-x="${x.id}">Delete</button></div>`).join(''):`<p class="sub">No saved trips yet. Plan one and press Save this trip.</p><a class="btn" href="#plan">Plan a trip</a>`}
+<section><h2>Favorite destinations</h2><p class="sub">${fv.length?fv.map(k=>D[k].n).join(', '):'Tap ♡ on a destination to add it here.'}</p></section></main>`;
+ const find=id=>trips().find(x=>x.id==id);
+ document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{cur=JSON.parse(JSON.stringify(find(b.dataset.o)));location.hash='result'});
+ document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{const c={...JSON.parse(JSON.stringify(find(b.dataset.c))),id:Date.now()};L.set('trips',[...trips(),c]);toast('Trip duplicated.');myTrips()});
+ document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{if(confirm('Delete this trip?')){L.set('trips',trips().filter(x=>x.id!=b.dataset.x));myTrips()}})}
+
+function auth(reg){app.innerHTML=`<main><h2>${reg?'Create your account':'Log in'}</h2><p class="sub">${reg?'Save trips and favorites to your account.':'Demo accounts: ishika@mail.com (admin) or negi@mail.com, password demo123.'}</p><form class="card" id="af" novalidate>
+${reg?'<label for="nm">Name</label><input id="nm" maxlength="60" autocomplete="name">':''}<label for="em">Email</label><input id="em" type="email" autocomplete="email"><label for="pw">Password</label><input id="pw" type="password" autocomplete="${reg?'new':'current'}-password">
+<div class="err" id="er"></div><div class="row"><button class="btn">${reg?'Sign up':'Log in'}</button><a class="btn ghost" href="#${reg?'login':'register'}">${reg?'I have an account':'Create account'}</a></div></form></main>`;
+ $('#af').onsubmit=async e=>{e.preventDefault();const em=$('#em').value.trim().toLowerCase(),pw=$('#pw').value,nm=reg?$('#nm').value.trim():'',er=$('#er');
+  if(reg&&!nm||!em||!pw)return er.textContent='Fill in all required fields.';
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em))return er.textContent='Enter a valid email address.';
+  const h=await hash(pw),u=users();
+  if(reg){if(pw.length<6)return er.textContent='Password needs at least 6 characters.';if(u.some(x=>x.email===em))return er.textContent='That email is already registered.';u.push({name:nm,email:em,pw:h,role:'User'});L.set('users',u);L.set('me',em);toast('Account created.');location.hash='plan'}
+  else{const f=u.find(x=>x.email===em&&x.pw===h);if(!f)return er.textContent='Incorrect email or password.';L.set('me',em);toast('Welcome back, '+f.name+'.');location.hash='plan'}}}
+
+function admin(){const u=me();if(u?.role!=='Admin'){app.innerHTML=`<main><h2>Admin Dashboard</h2><p class="sub">Only administrators can open this page. Log in as ishika@mail.com to try it.</p></main>`;return}
+ const us=users(),fb=L.get('fb',[]),avg=fb.length?(fb.reduce((s,x)=>s+x.avg,0)/fb.length).toFixed(1):'–';
+ app.innerHTML=`<main><h2>🛡 Admin Dashboard</h2><p class="sub">Signed in as ${esc(u.name)}</p><div class="stat"><div><b>${us.length}</b>Users</div><div><b>${trips().length}</b>Saved trips</div><div><b>${Object.keys(D).length}</b>Destinations</div><div><b>${fb.length}</b>Feedback (avg ${avg}/5)</div></div>
+<section><h3>Users</h3><table>${us.map((x,i)=>`<tr><td>${esc(x.name)} · ${esc(x.email)} · <b>${x.role}</b></td><td style="text-align:right"><button class="btn ghost sm" data-r="${i}">Make ${x.role==='Admin'?'User':'Admin'}</button> <button class="btn ghost sm" data-d="${i}">Remove</button></td></tr>`).join('')}</table></section>
+<section><h3>Add a user</h3><form class="card" id="nu" style="max-width:520px"><label for="a1">Name</label><input id="a1" maxlength="60"><label for="a2">Email</label><input id="a2" type="email"><label for="a3">Role</label><select id="a3"><option>User</option><option>Admin</option></select><div class="err" id="er"></div><div class="row"><button class="btn">Add user</button></div></form></section></main>`;
+ document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const a=users(),x=a[b.dataset.r];if(x.email===u.email)return toast('You cannot change your own role.');x.role=x.role==='Admin'?'User':'Admin';L.set('users',a);admin()});
+ document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const a=users();if(a[b.dataset.d].email===u.email)return toast('You cannot remove yourself.');a.splice(b.dataset.d,1);L.set('users',a);admin()});
+ $('#nu').onsubmit=async e=>{e.preventDefault();const n=$('#a1').value.trim(),m=$('#a2').value.trim().toLowerCase();if(!n||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m))return $('#er').textContent='Enter a name and a valid email.';
+  const a=users();if(a.some(x=>x.email===m))return $('#er').textContent='That email already exists.';a.push({name:n,email:m,pw:await hash('demo123'),role:$('#a3').value});L.set('users',a);admin()}}
+
+const QS=['How easy was it to use the planner?','How easy was registration and login?','How useful was the itinerary?','How relevant were the destinations?','How satisfied are you with the hotel suggestions?','How useful were the transport options?','How satisfied are you with the design?','Was the information clear?','How quickly did the site respond?','Overall experience'];
+function feedback(){app.innerHTML=`<main><h2>Your feedback</h2><p class="sub">Rate each item from 1 (very poor) to 5 (excellent).</p><form class="card" id="ff" style="max-width:620px">${QS.map((q,i)=>`<label for="q${i}">${q}</label><select id="q${i}"><option value="">Select</option>${[1,2,3,4,5].map(n=>`<option>${n}</option>`).join('')}</select>`).join('')}<label for="cm">What should we improve?</label><textarea id="cm" rows="3" maxlength="400"></textarea><div class="err" id="er"></div><div class="row"><button class="btn">Send feedback</button></div></form></main>`;
+ $('#ff').onsubmit=e=>{e.preventDefault();const r=QS.map((_,i)=>+$('#q'+i).value);if(r.some(x=>!x))return $('#er').textContent='Rate every question before sending.';
+  L.set('fb',[...L.get('fb',[]),{r,avg:r.reduce((a,b)=>a+b)/r.length,c:$('#cm').value.slice(0,400),u:L.get('me','')}]);toast('Thanks for your feedback.');location.hash='home'}}
+
+/* ---- Router ---- */
+function route(){const [r,p]=location.hash.slice(1).split('/');navbar();scrollTo(0,0);
+ ({'':home,home,plan:()=>plan(p),result,explore,trips:myTrips,login:()=>auth(0),register:()=>auth(1),admin,feedback}[r]||home)()}
+addEventListener('hashchange',route);seed().then(route);
+</script></body></html>
